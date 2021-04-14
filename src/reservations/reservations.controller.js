@@ -5,16 +5,30 @@ const service = require("./reservations.service");
 const wrapper = require("../errors/asyncErrorBoundary");
 
 async function list(req, res, next) {
-  const date = req.query.date;
-  if (!date) return next({ status: 400, message: "No date selected" });
+  const { date, mobile_number } = req.query;
+  //if (!date) return next({ status: 400, message: "No date selected" });
+  if (mobile_number) {
+    const data = await service.listByMobileNumber(mobile_number);
+    return res.json({
+      data: data,
+    });
+  }
   const data = await service.list(date);
   res.json({ data });
 }
 
 const read = async (req, res, next) => {
+  const reservation = res.locals.reservation;
+  res.status(200).json({ data: reservation[0] });
+};
+
+const hasValidId = async (req, res, next) => {
   const id = req.params.reservation_Id;
   const reservation = await service.read(id);
-  res.status(200).json({ data: reservation[0] });
+  if (!reservation.length)
+    return next({ status: 404, message: `${id} not found` });
+  res.locals.reservation = reservation;
+  next();
 };
 
 const isValid = (req, res, next) => {
@@ -26,6 +40,7 @@ const isValid = (req, res, next) => {
     reservation_date,
     reservation_time,
     people,
+    status,
   } = req.body.data;
   const requiredFields = [
     "first_name",
@@ -49,14 +64,20 @@ const isValid = (req, res, next) => {
       status: 400,
       message: `Invalid input for reservation_date, reservation_time, or people`,
     });
+  if (status === "seated")
+    return next({ status: 400, message: "status can not be seated!" });
+
+  if (status === "finished")
+    return next({ status: 400, message: "status can not be finished!" });
+
   res.locals.validReservation = req.body.data;
   next();
 };
 
 const create = async (req, res, next) => {
   const newReservation = res.locals.validReservation;
-  await service.create(newReservation);
-  res.status(201).json({ data: newReservation });
+  const newRes = await service.create(newReservation);
+  res.status(201).json({ data: newRes[0] });
 };
 
 const isFutureWorkingDate = (req, res, next) => {
@@ -82,8 +103,46 @@ const isDuringWorkingHours = (req, res, next) => {
   next();
 };
 
+async function validateStatusUpdate(req, res, next) {
+  const currentStatus = res.locals.reservation[0].status;
+  const { status } = req.body.data;
+
+  if (currentStatus === "finished")
+    return next({
+      status: 400,
+      message: "a finished reservation cannot be updated",
+    });
+
+  if (status === "cancelled") return next();
+
+  if (status !== "booked" && status !== "seated" && status !== "finished")
+    return next({ status: 400, message: "Can not update unknown status" });
+
+  next();
+}
+
+async function updateStatus(req, res, next) {
+  const { reservation_Id } = req.params;
+  const status = req.body.data.status;
+  const data = await service.updateStatus(reservation_Id, status);
+
+  res.status(200).json({
+    data: { status: data[0] },
+  });
+}
+
 module.exports = {
   list: [wrapper(list)],
-  read,
-  create: [isValid, isFutureWorkingDate, isDuringWorkingHours, wrapper(create)],
+  read: [wrapper(hasValidId), wrapper(read)],
+  create: [
+    wrapper(isValid),
+    wrapper(isFutureWorkingDate),
+    isDuringWorkingHours,
+    wrapper(create),
+  ],
+  updateStatus: [
+    wrapper(hasValidId),
+    wrapper(validateStatusUpdate),
+    wrapper(updateStatus),
+  ],
 };
