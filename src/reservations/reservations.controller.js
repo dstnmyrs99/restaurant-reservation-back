@@ -103,7 +103,7 @@ const isDuringWorkingHours = (req, res, next) => {
   next();
 };
 
-async function validateStatusUpdate(req, res, next) {
+const validateStatusUpdate = async (req, res, next) => {
   const currentStatus = res.locals.reservation[0].status;
   const { status } = req.body.data;
 
@@ -119,9 +119,9 @@ async function validateStatusUpdate(req, res, next) {
     return next({ status: 400, message: "Can not update unknown status" });
 
   next();
-}
+};
 
-async function updateStatus(req, res, next) {
+const updateStatus = async (req, res, next) => {
   const { reservation_Id } = req.params;
   const status = req.body.data.status;
   const data = await service.updateStatus(reservation_Id, status);
@@ -129,7 +129,15 @@ async function updateStatus(req, res, next) {
   res.status(200).json({
     data: { status: data[0] },
   });
-}
+};
+
+const update = async (req, res, next) => {
+  const { reservation_Id } = req.params;
+  const data = await service.update(reservation_Id, req.body.data);
+  res.status(200).json({
+    data: data[0],
+  });
+};
 
 module.exports = {
   list: [wrapper(list)],
@@ -137,12 +145,19 @@ module.exports = {
   create: [
     wrapper(isValid),
     wrapper(isFutureWorkingDate),
-    isDuringWorkingHours,
+    wrapper(isDuringWorkingHours),
     wrapper(create),
   ],
   updateStatus: [
     wrapper(hasValidId),
     wrapper(validateStatusUpdate),
     wrapper(updateStatus),
+  ],
+  update: [
+    wrapper(hasValidId),
+    wrapper(isValid),
+    wrapper(isFutureWorkingDate),
+    wrapper(isDuringWorkingHours),
+    wrapper(update),
   ],
 };

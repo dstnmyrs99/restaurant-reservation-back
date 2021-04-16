@@ -4,7 +4,7 @@ const list = async (date) => {
   return await knex("reservations")
     .select("*")
     .where({ reservation_date: date })
-    .whereNot({ status: "finished" })
+    .whereNotIn("status", ["cancelled", "finished"])
     .orderBy("reservation_time");
 };
 
@@ -27,9 +27,16 @@ const create = (reservation) => {
 
 const updateStatus = (reservation_id, status) => {
   return knex("reservations")
-    .where("reservation_id", reservation_id)
+    .where({ reservation_id: reservation_id })
     .update({ status: status })
     .returning("status");
+};
+
+const update = (reservation_id, updatedReservation) => {
+  return knex("reservations")
+    .where({ reservation_id: reservation_id })
+    .update(updatedReservation)
+    .returning("*");
 };
 
 module.exports = {
@@ -38,4 +45,5 @@ module.exports = {
   create,
   updateStatus,
   listByMobileNumber,
+  update,
 };
