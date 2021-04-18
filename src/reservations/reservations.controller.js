@@ -85,10 +85,13 @@ const isFutureWorkingDate = (req, res, next) => {
     `${req.body.data.reservation_date} ${req.body.data.reservation_time}`
   );
   let currentDay = new Date();
-  if (newDate.getDay() === 2 || newDate.toUTCString() < currentDay)
+  if (
+    newDate.getDay() === 2 ||
+    newDate.valueOf() + 300 < currentDay.valueOf()
+  )
     return next({
       status: 400,
-      message: `Restaurant is only opened on future dates and not Tuesdays`,
+      message: `Restaurant is only opened on future dates and is closed on Tuesdays`,
     });
   next();
 };
