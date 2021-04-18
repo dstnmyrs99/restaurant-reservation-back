@@ -1,6 +1,6 @@
 /* eslint-disable strict */
 
-const reservations = require("../fixtures/01-reservations");
+const reservations = require("../seedData/01-reservations");
 
 exports.seed = function (knex) {
   return knex

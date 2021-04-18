@@ -4,9 +4,8 @@
 const service = require("./reservations.service");
 const wrapper = require("../errors/asyncErrorBoundary");
 
-async function list(req, res, next) {
+const list = async (req, res, next) => {
   const { date, mobile_number } = req.query;
-  //if (!date) return next({ status: 400, message: "No date selected" });
   if (mobile_number) {
     const data = await service.listByMobileNumber(mobile_number);
     return res.json({
@@ -15,7 +14,7 @@ async function list(req, res, next) {
   }
   const data = await service.list(date);
   res.json({ data });
-}
+};
 
 const read = async (req, res, next) => {
   const reservation = res.locals.reservation;
@@ -33,15 +32,7 @@ const hasValidId = async (req, res, next) => {
 
 const isValid = (req, res, next) => {
   if (!req.body.data) return next({ status: 400, message: "No date selected" });
-  const {
-    first_name,
-    last_name,
-    mobile_number,
-    reservation_date,
-    reservation_time,
-    people,
-    status,
-  } = req.body.data;
+  const { reservation_date, reservation_time, people, status } = req.body.data;
   const requiredFields = [
     "first_name",
     "last_name",
@@ -84,10 +75,12 @@ const isFutureWorkingDate = (req, res, next) => {
   let newDate = new Date(
     `${req.body.data.reservation_date} ${req.body.data.reservation_time}`
   );
-  let currentDay = new Date();
+  const currentDay = new Date();
+  // get the timezone difference from client timezone to UTC
+  const difference = newDate.getTimezoneOffset();
   if (
     newDate.getDay() === 2 ||
-    newDate.valueOf() + 300 < currentDay.valueOf()
+    newDate.valueOf() + difference < currentDay.valueOf() //compare client time with difference to server UTC time
   )
     return next({
       status: 400,

@@ -1,5 +1,5 @@
 /* eslint-disable strict */
-const tables = require("../fixtures/01-tables");
+const tables = require("../seedData/01-tables");
 exports.seed = function (knex) {
   // Deletes ALL existing entries
   return knex

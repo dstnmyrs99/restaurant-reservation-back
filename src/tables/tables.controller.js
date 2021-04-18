@@ -7,22 +7,20 @@ const list = async (req, res, next) => {
   res.json({ data: tables });
 };
 
-async function checkId(req, res, next) {
+const checkId = async (req, res, next) => {
   const { table_id } = req.params;
   const data = await service.read(table_id);
   if (!data.length)
     return next({ status: 404, message: `Table ID: ${table_id} Not Found` });
-  else {
-    res.locals.table = data;
-    next();
-  }
-}
+  res.locals.table = data;
+  next();
+};
 
-async function read(req, res) {
+const read = async (req, res) => {
   res.json({
     data: res.locals.table,
   });
-}
+};
 
 const create = async (req, res, next) => {
   const newTable = req.body.data;
@@ -53,8 +51,13 @@ const isValid = (req, res, next) => {
 const update = async (req, res, next) => {
   const table_id = req.params.table_id;
   const reservation_id = req.body.data.reservation_id;
-  const updated = await service.update(table_id, reservation_id);
-  await reservation.updateStatus(reservation_id, "seated");
+  let updated;
+  try {
+    updated = await service.update(table_id, reservation_id);
+    await reservation.updateStatus(reservation_id, "seated");
+  } catch (err) {
+    next(err);
+  }
   res.status(200).json({ data: updated });
 };
 
@@ -95,7 +98,10 @@ const clearTable = async (req, res, next) => {
   const { table_id } = req.params;
   const reservationCheck = await service.read(table_id);
   const updated = await service.clearTable(table_id);
-  await reservation.updateStatus(reservationCheck[0].reservation_id, "finished");
+  await reservation.updateStatus(
+    reservationCheck[0].reservation_id,
+    "finished"
+  );
   res.status(200).json({ data: updated });
 };
 
