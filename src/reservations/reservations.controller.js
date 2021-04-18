@@ -78,6 +78,7 @@ const isFutureWorkingDate = (req, res, next) => {
   const currentDay = new Date();
   // get the timezone difference from client timezone to UTC
   const difference = newDate.getTimezoneOffset();
+  const newDay = new Date(newDate + difference);
   if (
     newDate.getDay() === 2 ||
     newDate.valueOf() + difference < currentDay.valueOf() //compare client time with difference to server UTC time
@@ -85,7 +86,7 @@ const isFutureWorkingDate = (req, res, next) => {
     return next({
       status: 400,
       message: `Restaurant is only opened on future dates and is closed on Tuesdays
-      current: ${currentDay.valueOf()} input: ${newDate.valueOf() + difference}`,
+      current: ${currentDay} input: ${newDay}`,
     });
   next();
 };
