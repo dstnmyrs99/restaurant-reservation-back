@@ -86,7 +86,7 @@ const isFutureWorkingDate = (req, res, next) => {
     return next({
       status: 400,
       message: `Restaurant is only opened on future dates and is closed on Tuesdays
-      current: ${currentDay} input: ${newDay}`,
+      current: ${currentDay.valueOf()} input: ${newDay.valueOf()}`,
     });
   next();
 };
