@@ -76,17 +76,13 @@ const isFutureWorkingDate = (req, res, next) => {
     `${req.body.data.reservation_date} ${req.body.data.reservation_time}`
   );
   const currentDay = new Date();
-  // get the timezone difference from client timezone to UTC
-  const difference = newDate.getTimezoneOffset();
-  const newDay = new Date(newDate.valueOf() + difference);
   if (
     newDate.getDay() === 2 ||
-    newDate.valueOf() + difference < currentDay.valueOf() //compare client time with difference to server UTC time
+    newDate.valueOf() < currentDay.valueOf()
   )
     return next({
       status: 400,
-      message: `Restaurant is only opened on future dates and is closed on Tuesdays
-      current: ${currentDay.valueOf()} input: ${newDay.valueOf()}`,
+      message: `You can only reserve for future dates and Restaurant is closed on Tuesdays`,
     });
   next();
 };
