@@ -78,7 +78,7 @@ const isFutureWorkingDate = (req, res, next) => {
   const currentDay = new Date();
   // get the timezone difference from client timezone to UTC
   const difference = newDate.getTimezoneOffset();
-  const newDay = new Date(newDate + difference);
+  const newDay = new Date(newDate.valueOf() + difference);
   if (
     newDate.getDay() === 2 ||
     newDate.valueOf() + difference < currentDay.valueOf() //compare client time with difference to server UTC time
