@@ -7,9 +7,9 @@ The user can create new reservations and search reservations by phone number.
 and also keep track of where reservations are seated and occupied tables.
 
 ### The Dashboard
-![Image of Dashboard](../images/dashboard.png)
+![Image of Dashboard](./images/dashboard.png)
 ### Create new Reservation
-![Image of New Reservation](../images/createReservation.png)
+![Image of New Reservation](./images/createReservation.png)
 
 ## Tech Stack
 This web app was developed using HTML, CSS, JavaScript, BootStrap, React, Express, Node, PostgreSQL, and Knex.
