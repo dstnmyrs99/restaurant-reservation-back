@@ -88,7 +88,7 @@ const isFutureWorkingDate = (req, res, next) => {
   if (newDate.getDay() === 2 || newDate < currentDay)
     return next({
       status: 400,
-      message: `Restaurant is closed on tuesdays and future dates.`,
+      message: `Restaurant is closed on tuesdays and past dates. new: ${newDate}, current: ${currentDay}`,
     });
   next();
 };
