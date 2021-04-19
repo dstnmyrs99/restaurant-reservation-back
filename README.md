@@ -79,7 +79,7 @@ DATABASE_URL_DEVELOPMENT=enter-your-development-database-url-here
 DATABASE_URL_TEST=enter-your-test-database-url-here
 DATABASE_URL_PREVIEW=enter-your-preview-database-url-here
 LOG_LEVEL=info
-
-// front-end .env example -> Connects to server
-REACT_APP_API_BASE_URL=http://localhost:5000
 ```
+    
+ Make sure to grab the frontend from   
+     [Restaurant Reservation System Frontend](https://github.com/dstnmyrs99/restaurant-reservation-front "Restaurant Reservation System Frontend")
